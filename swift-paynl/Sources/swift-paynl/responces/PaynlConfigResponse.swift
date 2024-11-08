@@ -13,7 +13,6 @@ struct PaynlConfigResponse: Codable {
     let secret          : String
     let name            : String
     let status          : String
-    let testMode        : Bool
     let mcc             : Int
     let category        : Category
     let merchant        : Merchant
@@ -34,6 +33,7 @@ struct PaynlConfigResponse: Codable {
     let checkoutOptions : [CheckoutOption]
     let checkoutSequence: CheckoutSequence
     let encryptionKeys  : [EncryptionKey]
+    let testMode        : Bool
 
     enum CodingKeys: String, CodingKey {
         case links = "_links"
@@ -42,133 +42,134 @@ struct PaynlConfigResponse: Codable {
              createdAt, createdBy, modifiedAt, modifiedBy, deletedAt, deletedBy,
              checkoutOptions, checkoutSequence, checkoutTexts, encryptionKeys, tguList
     }
-}
 
-// MARK: - Translation
-struct Translations: Codable {
-    let name: [String: String]
-}
 
-// MARK: - Merchant
-struct Merchant: Codable {
-    let code                : String
-    let name                : String
-    let status              : String // TODO: what type should be used for "ACTIVE"?
-    let incorporationCountry: String // TODO: ... "NL"
-}
-
-// MARK: - Category
-struct Category: Codable {
-    let code: String
-    let name: String
-}
-
-// MARK: - Layout
-struct Layout: Codable {
-    let code           : String
-    let name           : String
-    let icon           : String?
-    let cssUrl         : String
-    let buttonColor    : String
-    let supportingColor: String
-    let headerTextColor: String
-    let buttonTextColor: String
-}
-
-// MARK: - Trade
-struct Trade: Codable {
-    let code: String
-    let name: String
-}
-
-// MARK: - Address
-struct Address: Codable {
-    let code        : String
-    let city        : String
-    let zipCode     : String
-    let streetName  : String
-    let countryCode : String
-    let streetNumber: String
-}
-
-// MARK: - CheckoutOption
-struct CheckoutOption: Codable {
-    let tag           : String
-    let name          : String
-    let image         : String
-    let translations  : Translations
-    let paymentMethods: [PaymentMethod]
-    let requiredFields: [RequiredField]
-}
-
-// MARK: - PaymentMethod
-struct PaymentMethod: Codable {
-    let id          : Int
-    let name        : String
-    let image       : String
-    let options     : [Option]
-    let settings    : [Setting]
-    let minAmount   : Int
-    let maxAmount   : Int
-    let description : String?
-    let translations: Translations
-}
-
-// MARK: - Option
-struct Option: Codable {
-    let id   : String
-    let name : String
-    let image: String
-}
-
-// MARK: - Setting
-struct Setting: Codable {}
-
-// MARK: - RequiredField
-struct RequiredField: Codable {
-    let fieldName: String
-    let mandatory: String
-}
-
-// MARK: - CheckoutSequence
-struct CheckoutSequence: Codable { // TODO: is countryList("NL", "DE", "BE") dynamic or fixed?
-    let `default`: CheckoutCountry
-    let nl       : CheckoutCountry
-    let de       : CheckoutCountry
-    let be       : CheckoutCountry
-
-    enum CodingKeys: String, CodingKey {
-        case `default` = "default"
-        case nl        = "NL"
-        case de        = "DE"
-        case be        = "BE"
+    // MARK: - Translation
+    struct Translations: Codable {
+        let name: [String: String]
     }
-}
 
-// MARK: - CheckoutCountry
-struct CheckoutCountry: Codable {
-    let primary  : [String]
-    let secondary: [String]
-}
+    // MARK: - Merchant
+    struct Merchant: Codable {
+        let code                : String
+        let name                : String
+        let status              : String // TODO: what type should be used for "ACTIVE"?
+        let incorporationCountry: String // TODO: ... "NL"
+    }
 
-// MARK: - EncryptionKey
-struct EncryptionKey: Codable {
-    let identifier: String
-    let publicKey : String
-    let createdAt : Date
-    let expiresAt : Date
-}
+    // MARK: - Category
+    struct Category: Codable {
+        let code: String
+        let name: String
+    }
 
-// MARK: - TGU
-struct TGU: Codable {
-    let id    : Int
-    let share : Int
-    let domain: String
-    let status: String
+    // MARK: - Layout
+    struct Layout: Codable {
+        let code           : String
+        let name           : String
+        let icon           : String?
+        let cssUrl         : String
+        let buttonColor    : String
+        let supportingColor: String
+        let headerTextColor: String
+        let buttonTextColor: String
+    }
 
-    enum CodingKeys: String, CodingKey {
-        case id = "ID"
-        case share, domain, status
+    // MARK: - Trade
+    struct Trade: Codable {
+        let code: String
+        let name: String
+    }
+
+    // MARK: - Address
+    struct Address: Codable {
+        let code        : String
+        let city        : String
+        let zipCode     : String
+        let streetName  : String
+        let countryCode : String
+        let streetNumber: String
+    }
+
+    // MARK: - CheckoutOption
+    struct CheckoutOption: Codable {
+        let tag           : String
+        let name          : String
+        let image         : String
+        let translations  : Translations
+        let paymentMethods: [PaymentMethod]
+        let requiredFields: [RequiredField]
+    }
+
+    // MARK: - PaymentMethod
+    struct PaymentMethod: Codable {
+        let id          : Int
+        let name        : String
+        let image       : String
+        let options     : [Option]
+        let settings    : [Setting]
+        let minAmount   : Int
+        let maxAmount   : Int
+        let description : String?
+        let translations: Translations
+    }
+
+    // MARK: - Option
+    struct Option: Codable {
+        let id   : String
+        let name : String
+        let image: String
+    }
+
+    // MARK: - Setting
+    struct Setting: Codable {}
+
+    // MARK: - RequiredField
+    struct RequiredField: Codable {
+        let fieldName: String
+        let mandatory: String
+    }
+
+    // MARK: - CheckoutSequence
+    struct CheckoutSequence: Codable { // TODO: is countryList("NL", "DE", "BE") dynamic or fixed?
+        let `default`: CheckoutCountry
+        let nl       : CheckoutCountry
+        let de       : CheckoutCountry
+        let be       : CheckoutCountry
+
+        enum CodingKeys: String, CodingKey {
+            case `default` = "default"
+            case nl        = "NL"
+            case de        = "DE"
+            case be        = "BE"
+        }
+    }
+
+    // MARK: - CheckoutCountry
+    struct CheckoutCountry: Codable {
+        let primary  : [String]
+        let secondary: [String]
+    }
+
+    // MARK: - EncryptionKey
+    struct EncryptionKey: Codable {
+        let identifier: String
+        let publicKey : String
+        let createdAt : Date
+        let expiresAt : Date
+    }
+
+    // MARK: - TGU
+    struct TGU: Codable {
+        let id    : Int
+        let share : Int
+        let domain: String
+        let status: String
+
+        enum CodingKeys: String, CodingKey {
+            case id = "ID"
+            case share, domain, status
+        }
     }
 }
 
