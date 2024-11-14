@@ -8,5 +8,5 @@
 import Foundation
 
 struct PaynlAuthorizeResponse: Codable {
-    // TODO: Identical to `PaynlAuthenticateResponse`
+    #warning("Identical to `PaynlAuthenticateResponse`")
 }
