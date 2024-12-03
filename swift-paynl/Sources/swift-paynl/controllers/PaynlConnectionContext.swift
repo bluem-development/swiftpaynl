@@ -23,7 +23,7 @@ public struct PaynlConnectionContext {
      */
 
 
-    fileprivate let _serviceId         : String?
+    fileprivate var config             : Configuration?
     private     var tokens             : [AuthenticationTokenTest]?
     private     var timer              : Timer?
     private     let duration           = 300.0 // 5 minutes in seconds
@@ -33,7 +33,7 @@ public struct PaynlConnectionContext {
     public init(configPath: String) {
         // TODO: Take `serviceId` from json located at configPath
         // TODO: Initialize the `serviceId`
-        _serviceId = "testId"
+        self.config = loadConfig(atPath: configPath)
     }
 
     private mutating func validTokens() -> [AuthenticationTokenTest]? {
@@ -57,6 +57,21 @@ public struct PaynlConnectionContext {
         }
 
         return validTokens
+    }
+
+    private func loadConfig(atPath path: String) -> Configuration? {
+        var result: Configuration?
+        let fm = FileManager.default
+
+        if fm.fileExists(atPath: path) {
+            let data = fm.contents(atPath: path)
+
+            if let data = data, let model = try? JSONDecoder().decode(Configuration.self, from: data) {
+                result = model
+            }
+        }
+
+        return result
     }
 }
 
@@ -99,7 +114,7 @@ extension PaynlConnectionContext: PaynlConnectionContextProtocol {
     }
 
     public var serviceId: String? {
-        self._serviceId
+        self.config?.serverId
     }
 
     public mutating func token() -> String? {
@@ -128,7 +143,9 @@ struct AuthenticationTokenTest {
     }
 }
 
-
+private struct Configuration: Decodable {
+    let serverId: String
+}
 // MARK: - Usage
 /*
 func start() {
