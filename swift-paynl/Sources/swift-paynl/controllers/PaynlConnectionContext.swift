@@ -23,11 +23,11 @@ public struct PaynlConnectionContext {
      */
 
 
-    fileprivate let _serviceId        : String?
-    private     var tokens            : [AuthenticationTokenTest]?
-    private     var timer             : Timer?
-    private     let duration          = 300.0 // 5 minutes in seconds
-    private     var needToUpdateToken = false
+    fileprivate let _serviceId         : String?
+    private     var tokens             : [AuthenticationTokenTest]?
+    private     var timer              : Timer?
+    private     let duration           = 300.0 // 5 minutes in seconds
+    private     var needToUpdateToken  = false
     public      var updateTokenIsNeeded: (() -> Void)?
 
     public init(configPath: String) {
