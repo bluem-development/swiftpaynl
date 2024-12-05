@@ -7,36 +7,35 @@
 
 import Foundation
 
-public struct PaynlConnectionContext {
+// TODO: Switch to actor in the future
+public class PaynlConnectionContext {
     /*
      Overview
 
-     1. The token is mandatory for authenticating API requests
+     1. The `token` is mandatory for authenticating API requests
      - API endpoint: https://rest.pay.nl/v2/authenticationtokens
      - The `authenticationtokens` API request returns all authentication tokens (an array of token objects)
      - The token object contains an `deletedAt` field that indicates the expiration time
      - If a token is requested but all tokens are expired, a new API request must be sent to retrieve and return a valid token
 
-     2. `serviceId` is mandatory for performing an API call
+     2. The `serviceId` is mandatory for performing an API call
      - Link: https://my.pay.nl/programs/programs
      - The value of serviceId is retrieved from an external directory. The directory path is passed as an argument to the `PaynlConnectionContext` initializer
      */
 
 
-    fileprivate var config             : Configuration?
-    private     var tokens             : [AuthenticationTokenTest]?
+    fileprivate var config             : PaynlConfiguration?
+    private     var tokens             : [PaynlAuthenticationTokenTest]?
     private     var timer              : Timer?
     private     let duration           = 300.0 // 5 minutes in seconds
     private     var needToUpdateToken  = false
     public      var updateTokenIsNeeded: (() -> Void)?
 
     public init(configPath: String) {
-        // TODO: Take `serviceId` from json located at configPath
-        // TODO: Initialize the `serviceId`
         self.config = loadConfig(atPath: configPath)
     }
 
-    private mutating func validTokens() -> [AuthenticationTokenTest]? {
+    private func validTokens() -> [PaynlAuthenticationTokenTest]? {
         guard let tokens = tokens
         else { return nil }
 
@@ -59,14 +58,14 @@ public struct PaynlConnectionContext {
         return validTokens
     }
 
-    private func loadConfig(atPath path: String) -> Configuration? {
-        var result: Configuration?
+    private func loadConfig(atPath path: String) -> PaynlConfiguration? {
+        var result: PaynlConfiguration?
         let fm = FileManager.default
 
         if fm.fileExists(atPath: path) {
             let data = fm.contents(atPath: path)
 
-            if let data = data, let model = try? JSONDecoder().decode(Configuration.self, from: data) {
+            if let data = data, let model = try? JSONDecoder().decode(PaynlConfiguration.self, from: data) {
                 result = model
             }
         }
@@ -77,7 +76,7 @@ public struct PaynlConnectionContext {
 
 // MARK: - Timer
 extension PaynlConnectionContext {
-    private mutating func startTimer() {
+    private func startTimer() {
         stopTimer()
         let mSelf = self
 
@@ -87,7 +86,7 @@ extension PaynlConnectionContext {
         }
     }
 
-    private mutating func stopTimer() {
+    private func stopTimer() {
         timer?.invalidate()
         timer = nil
     }
@@ -96,38 +95,29 @@ extension PaynlConnectionContext {
 // MARK: - PaynlConnectionContextProtocol
 public protocol PaynlConnectionContextProtocol {
     var serviceId: String? { get }
-
-    mutating func token() -> String?
-    mutating func loadToken(callback:((String?) -> Void))
+    var token    : String? { get async }
 }
 
 extension PaynlConnectionContext: PaynlConnectionContextProtocol {
-    public mutating func loadToken(callback:((String?) -> Void)) {
-        // TODO: Send the `authenticationtokens` API request
-        // TODO: Initialize the `tokens`
-        let tokens = [AuthenticationTokenTest(deletedAt: "2024-12-02T00:30:12+02:00", token: "1111"),
-                      AuthenticationTokenTest(deletedAt: "2024-12-02T22:30:24+02:00", token: "3333")]
-        self.tokens = tokens
-
-        callback(validTokens()?.first?.token)
-        if needToUpdateToken { startTimer() }
-    }
-
     public var serviceId: String? {
         self.config?.serverId
     }
 
-    public mutating func token() -> String? {
-        // Create a loop of `tokens`, return non-expired token or nil if there is no valid token
-        let token = validTokens()?.first?.token
-        if needToUpdateToken { startTimer() }
+    public var token: String? {
+        get async {
+            if let token = validTokens()?.first?.token { return token }
+            else { return await fetchTokens() }
+        }
+    }
 
-        return token
+    private func fetchTokens() async -> String? {
+        // TODO: Implement me!
+        return nil
     }
 }
 
 // MARK: - Test type with minimal fields
-struct AuthenticationTokenTest {
+private struct PaynlAuthenticationTokenTest {
     let deletedAt: String?
     let token    : String
 
@@ -143,29 +133,7 @@ struct AuthenticationTokenTest {
     }
 }
 
-private struct Configuration: Decodable {
+// MARK: - PaynlConfiguration
+private struct PaynlConfiguration: Codable {
     let serverId: String
 }
-// MARK: - Usage
-/*
-func start() {
-    var context = PaynlConnectionContext(configPath: "")
-    guard context.serviceId != nil
-    else { print("The `serviceId` is not found."); return }
-
-    //Subscribe to event
-    context.updateTokenIsNeeded = {
-        context.loadToken { token in
-            print("Update. The new token is: \(token ?? "nil")")
-        }
-    }
-
-    if let token = context.token(), !token.isEmpty {
-        // The next api call
-    } else {
-        context.loadToken { token in
-            print("First Load. The new token is: \(token ?? "nil")")
-        }
-    }
-}
-*/
