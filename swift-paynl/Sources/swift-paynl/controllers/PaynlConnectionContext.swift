@@ -59,18 +59,13 @@ public class PaynlConnectionContext {
     }
 
     private func loadConfig(atPath path: String) -> PaynlConfiguration? {
-        var result: PaynlConfiguration?
-        let fm = FileManager.default
+        do    { return try Data.decode(from: path, as: PaynlConfiguration.self) }
+        catch { return nil }
+    }
 
-        if fm.fileExists(atPath: path) {
-            let data = fm.contents(atPath: path)
-
-            if let data = data, let model = try? JSONDecoder().decode(PaynlConfiguration.self, from: data) {
-                result = model
-            }
-        }
-
-        return result
+    private func fetchTokens() async -> [PaynlAuthenticationTokenTest]? {
+        // TODO: Implement me!
+        return nil
     }
 }
 
@@ -106,13 +101,11 @@ extension PaynlConnectionContext: PaynlConnectionContextProtocol {
     public var token: String? {
         get async {
             if let token = validTokens()?.first?.token { return token }
-            else { return await fetchTokens() }
+            else {
+                self.tokens = await fetchTokens()
+                return validTokens()?.first?.token
+            }
         }
-    }
-
-    private func fetchTokens() async -> String? {
-        // TODO: Implement me!
-        return nil
     }
 }
 
